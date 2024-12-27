@@ -26,3 +26,19 @@ git clone < ... > .dotfiles
 Then run the above commands to rebuild the nix system.
 NB: You must stage & commit any changes within the git repo before you rebuild the system. 
 
+## Secrets
+
+To edit the secret files, go into the `.dotfiles` folder and decrypt the file with
+```bash
+sops secrets/secret.yaml
+```
+
+Generating Secrets
+
+```bash
+#Generate new key at ~/.config/sops/age/keys.txt
+nix shell nixpkgs#age -c age-keygen -o ~/.config/sops/age/keys.txt
+
+# generate new key at ~/.config/sops/age/keys.txt from private ssh key at ~/.ssh/private
+nix run nixpkgs#ssh-to-age -- -private-key -i ~/.ssh/private > ~/.config/sops/age/keys.txt
+```
