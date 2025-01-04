@@ -73,6 +73,7 @@
     pkgs.jellyfin
     pkgs.jellyfin-web
     pkgs.jellyfin-ffmpeg
+    mergerfs
   ];
 
   # Some programs need SUID wrappers, can be configured further or are

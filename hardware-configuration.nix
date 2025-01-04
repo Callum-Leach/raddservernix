@@ -26,6 +26,25 @@
 
   swapDevices = [ ];
 
+## DISKS
+########
+
+## main - primary data pool
+## disk1 - ata-SanDisk_SDSSDHII480G_152223400239-part1
+
+
+## media storage disks etc
+  fileSystems."/mnt/main" =
+    { device = "/mnt/disks/disk*";
+      fsType = "fuse.mergerfs";
+      options = ["defaults" "minfreespace=20G" "fsname=mergerfs-main"];
+    };
+
+  fileSystems."/mnt/disks/disk1" =
+    { device = "/dev/disk/by-id/ata-SanDisk_SDSSDHII480G_152223400239-part1";
+      fsType = "ext4";
+    };
+
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
   # still possible to use this option, but it's recommended to use it in conjunction
