@@ -70,6 +70,9 @@
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
     git
+    pkgs.jellyfin
+    pkgs.jellyfin-web
+    pkgs.jellyfin-ffmpeg
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -83,11 +86,6 @@
   # List services that you want to enable:
 
   services.jellyfin.enable = true;
-  environment.systemPackages = [
-    pkgs.jellyfin
-    pkgs.jellyfin-web
-    pkgs.jellyfin-ffmpeg
-  ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
