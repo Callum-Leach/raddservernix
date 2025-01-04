@@ -70,7 +70,7 @@
   users.users.callumleach = {
     isNormalUser = true;
     description = "Callum Leach";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
     packages = with pkgs; [
       git
     ];
@@ -98,6 +98,16 @@
   #   enable = true;
   #   enableSSHSupport = true;
   # };
+
+  virtualisation = {
+    docker = {
+      enable = true;
+      autoPrune = {
+        enable = true;
+        dates = "weekly";
+      };
+    };
+  };
 
   # List services that you want to enable:
 
