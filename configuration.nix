@@ -89,6 +89,8 @@
   services.jellyfin = {
     enable = true;
     openFirewall = true;
+    dataDir = "mergerfs-main";
+    user = "callumleach";
   };
   
   # Enable the OpenSSH daemon.
