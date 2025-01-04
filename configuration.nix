@@ -14,7 +14,6 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-
   networking.hostName = "raddservernix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
@@ -82,6 +81,13 @@
   # };
 
   # List services that you want to enable:
+
+  services.jellyfin.enable = true;
+  environment.systemPackages = [
+    pkgs.jellyfin
+    pkgs.jellyfin-web
+    pkgs.jellyfin-ffmpeg
+  ];
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
