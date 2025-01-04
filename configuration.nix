@@ -85,8 +85,11 @@
 
   # List services that you want to enable:
 
-  services.jellyfin.enable = true;
-
+  services.jellyfin = {
+    enable = true;
+    openFirewall = true;
+  };
+  
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 
