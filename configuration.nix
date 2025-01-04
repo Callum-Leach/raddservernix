@@ -89,7 +89,7 @@
   services.jellyfin = {
     enable = true;
     openFirewall = true;
-    dataDir = "mergerfs-main";
+    dataDir = "mergerfs-main/";
     user = "callumleach";
   };
   
