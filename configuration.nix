@@ -89,7 +89,7 @@
   services.jellyfin = {
     enable = true;
     openFirewall = true;
-    dataDir = "/mnt/main/films";
+    dataDir = "/mnt/main/";
     user = "callumleach";
   };
   
