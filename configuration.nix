@@ -89,7 +89,7 @@
   services.jellyfin = {
     enable = true;
     openFirewall = true;
-    dataDir = "mergerfs-main/";
+    dataDir = [ "/mnt/main/films" "/mnt/main/tvseries" ];
     user = "callumleach";
   };
   
