@@ -35,12 +35,15 @@ sops secrets/secret.yaml
 
 Generating Secrets
 
-```bash
-#Generate new key at ~/.config/sops/age/keys.txt
-nix shell nixpkgs#age -c age-keygen -o ~/.config/sops/age/keys.txt
+### To create a secrets file
 
-# generate new key at ~/.config/sops/age/keys.txt from private ssh key at ~/.ssh/private
-nix run nixpkgs#ssh-to-age -- -private-key -i ~/.ssh/private > ~/.config/sops/age/keys.txt
+```bash
+nix run github:ryantm/agenix -- -e < filename.age >
+```
+
+### To edit secrets
+```bash
+nix run github:ryantm/agenix -- -e < filename.age > -i < SSH PRIVATE KEY LOCATION >
 ```
 
 ## Useful Functions

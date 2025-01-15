@@ -166,7 +166,7 @@
   services.homepage-dashboard = {
     enable = true;
     openFirewall = true;
-    environmentFile = config.age.secrets.homepage.path;
+    environmentFile = config.age.secrets.homepage-dashboard.path;
     bookmarks = [{
       dev = [
         {

@@ -5,5 +5,5 @@ let
 in
 {
   "cloudflare_dns_api.age".publicKeys = users ++ [ raddservernix ];
-  "homepage.age".publicKeys = users ++ [ raddservernix ];
+  "homepage-dashboard.age".publicKeys = users ++ [ raddservernix ];
 }
