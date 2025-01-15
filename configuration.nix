@@ -8,6 +8,7 @@
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
+      ./secrets.nix
     ];
 
   # Bootloader.
@@ -23,6 +24,8 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
+  networking.firewall.allowedTCPPorts = [ 80 443 ];
+
 
   nixpkgs.config.packageOverrides = pkgs: {
     vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
@@ -85,10 +88,14 @@
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
     git
+    htop
     pkgs.jellyfin
     pkgs.jellyfin-web
     pkgs.jellyfin-ffmpeg
     mergerfs
+    caddy
+    vaultwarden
+    homepage-dashboard
   ];
 
   # Some programs need SUID wrappers, can be configured further or are
@@ -99,15 +106,15 @@
   #   enableSSHSupport = true;
   # };
 
-  virtualisation = {
-    docker = {
-      enable = true;
-      autoPrune = {
-        enable = true;
-        dates = "weekly";
-      };
-    };
-  };
+#  virtualisation = {
+#    docker = {
+#      enable = true;
+#      autoPrune = {
+#        enable = true;
+#        dates = "weekly";
+#      };
+#    };
+#  };
 
   # List services that you want to enable:
 
@@ -117,7 +124,221 @@
     dataDir = "/mnt/main/";
     user = "callumleach";
   };
-  
+
+  services.vaultwarden.enable = true;
+
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "callumleach31@gmail.com";
+
+    certs."raddserver.co.uk" = {
+      group = config.services.caddy.group;
+
+      domain = "raddserver.co.uk";
+      extraDomainNames = [ "*.raddserver.co.uk" ];
+      dnsProvider = "cloudflare";
+      dnsResolver = "1.1.1.1:53";
+      dnsPropagationCheck = true;
+      environmentFile = config.age.secrets.cloudflare_dns_api.path;
+    };
+  };
+
+  services.caddy = {
+    enable = true;
+    virtualHosts."jellyfin.raddserver.co.uk".extraConfig = ''
+      reverse_proxy http://192.168.1.22:8096
+
+      tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
+        protocols tls1.3
+      }
+    '';
+
+    virtualHosts."raddserver.co.uk".extraConfig = ''
+      reverse_proxy http://192.168.1.22:8082
+      
+      tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
+        protocols tls1.3
+      }
+    '';
+
+  };
+
+  services.homepage-dashboard = {
+    enable = true;
+    openFirewall = true;
+    environmentFile = config.age.secrets.homepage.path;
+    bookmarks = [{
+      dev = [
+        {
+          github = [{
+            abbr = "GH";
+            href = "https://github.com/";
+            icon = "github-light.png";
+          }];
+        }
+        {
+          "homepage docs" = [{
+            abbr = "HD";
+            href = "https://gethomepage.dev";
+            icon = "homepage.png";
+          }];
+        }
+      ];
+      machines = [
+        {
+          tower = [{
+            abbr = "TR";
+            href = "https://dash.crgrd.uk";
+            icon = "homarr.png";
+          }];
+        }
+        {
+          gbox = [{
+            abbr = "GB";
+            href = "https://dash.gbox.crgrd.uk";
+            icon = "homepage.png";
+          }];
+        }
+      ];
+    }];
+    services = [
+      {
+        media = [
+          {
+            Jellyfin = {
+              icon = "jellyfin.png";
+              href = "{{HOMEPAGE_VAR_JELLYFIN_URL}}";
+              description = "media management";
+              widget = {
+                type = "jellyfin";
+                url = "{{HOMEPAGE_VAR_JELLYFIN_URL}}";
+                key = "{{HOMEPAGE_VAR_JELLYFIN_API_KEY}}";
+              };
+            };
+          }
+          {
+            Radarr = {
+              icon = "radarr.png";
+              href = "{{HOMEPAGE_VAR_RADARR_URL}}";
+              description = "film management";
+              widget = {
+                type = "radarr";
+                url = "{{HOMEPAGE_VAR_RADARR_URL}}";
+                key = "{{HOMEPAGE_VAR_RADARR_API_KEY}}";
+              };
+            };
+          }
+          {
+            Sonarr = {
+              icon = "sonarr.png";
+              href = "{{HOMEPAGE_VAR_SONARR_URL}}";
+              description = "tv management";
+              widget = {
+                type = "sonarr";
+                url = "{{HOMEPAGE_VAR_SONARR_URL}}";
+                key = "{{HOMEPAGE_VAR_SONARR_API_KEY}}";
+              };
+            };
+          }
+          {
+            Prowlarr = {
+              icon = "prowlarr.png";
+              href = "{{HOMEPAGE_VAR_PROWLARR_URL}}";
+              description = "index management";
+              widget = {
+                type = "prowlarr";
+                url = "{{HOMEPAGE_VAR_PROWLARR_URL}}";
+                key = "{{HOMEPAGE_VAR_PROWLARR_API_KEY}}";
+              };
+            };
+          }
+          {
+            Sabnzbd = {
+              icon = "sabnzbd.png";
+              href = "{{HOMEPAGE_VAR_SABNZBD_URL}}/";
+              description = "download client";
+              widget = {
+                type = "sabnzbd";
+                url = "{{HOMEPAGE_VAR_SABNZBD_URL}}";
+                key = "{{HOMEPAGE_VAR_SABNZBD_API_KEY}}";
+              };
+            };
+          }
+        ];
+      }
+      {
+        infra = [
+          {
+            Files = {
+              description = "file manager";
+              icon = "files.png";
+              href = "https://files.jnsgr.uk";
+            };
+          }
+          {
+            "Syncthing (thor)" = {
+              description = "syncthing ui for thor";
+              icon = "syncthing.png";
+              href = "https://thor.sync.jnsgr.uk";
+            };
+          }
+          {
+            "Syncthing (kara)" = {
+              description = "syncthing ui for kara";
+              icon = "syncthing.png";
+              href = "https://kara.sync.jnsgr.uk";
+            };
+          }
+          {
+            "Syncthing (freyja)" = {
+              description = "syncthing ui for freyja";
+              icon = "syncthing.png";
+              href = "https://freyja.sync.jnsgr.uk";
+            };
+          }
+        ];
+      }
+      {
+        machines = [
+          {
+            KVM = {
+              description = "KVM";
+              icon = "tailscale.png";
+              href = "https://raddserver.co.uk";
+              widget = {
+                type = "tailscale";
+                deviceid = "{{HOMEPAGE_VAR_TAILSCALE_KVM_DEVICE_ID}}";
+                key = "{{HOMEPAGE_VAR_TAILSCALE_AUTH_KEY}}";
+              };
+            };
+          }
+        ];
+      }
+    ];
+    settings = {
+      title = "raddserver";
+      favicon = "";
+      headerStyle = "clean";
+      layout = {
+        media = { style = "row"; columns = 3; };
+        infra = { style = "row"; columns = 4; };
+        machines = { style = "row"; columns = 4; };
+      };
+    };
+    widgets = [
+      { search = { provider = "google"; target = "_blank"; }; }
+      { resources = { label = "system"; cpu = true; memory = true; }; }
+      { resources = { label = "storage"; disk = [ "/mnt/main" ]; }; }
+      {
+        openmeteo = {
+          label = "Tiverton";
+          timezone = "Europe/London";
+          units = "metric";
+        };
+      }
+    ];
+  };
+
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
 

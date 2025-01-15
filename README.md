@@ -42,3 +42,8 @@ nix shell nixpkgs#age -c age-keygen -o ~/.config/sops/age/keys.txt
 # generate new key at ~/.config/sops/age/keys.txt from private ssh key at ~/.ssh/private
 nix run nixpkgs#ssh-to-age -- -private-key -i ~/.ssh/private > ~/.config/sops/age/keys.txt
 ```
+
+## Useful Functions
+```bash
+nixos flake check
+```
