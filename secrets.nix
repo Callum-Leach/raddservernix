@@ -7,6 +7,9 @@
       homepage-dashboard = {
       file = secrets/homepage-dashboard.age;
       };
+      vaultwarden = {
+      file = secrets/vaultwarden.age;
+      };
     };
   };
 }
