@@ -24,7 +24,7 @@
 
   # Enable networking
   networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 ];
+  networking.firewall.allowedTCPPorts = [ 80 443 25565 ];
 
 
   nixpkgs.config.packageOverrides = pkgs: {
@@ -125,7 +125,16 @@
     user = "callumleach";
   };
 
-  services.vaultwarden.enable = true;
+  services.vaultwarden = {
+    enable = true;
+#    dbBackend = "postgresql";
+    # Store your variables like admin password here
+    environmentFile = config.age.secrets.vaultwarden.path;
+    config = {
+      SIGNUPS_ALLOWED = false;
+      DOMAIN = "https://vaultwarden.raddserver.co.uk";
+    };
+  };
 
   security.acme = {
     acceptTerms = true;
@@ -156,6 +165,14 @@
     virtualHosts."raddserver.co.uk".extraConfig = ''
       reverse_proxy http://192.168.1.22:8082
       
+      tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
+        protocols tls1.3
+      }
+    '';
+
+    virtualHosts."vaultwarden.raddserver.co.uk".extraConfig = ''
+      reverse_proxy http://192.168.1.22:8000
+
       tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
         protocols tls1.3
       }

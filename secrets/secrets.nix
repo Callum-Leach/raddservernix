@@ -6,4 +6,5 @@ in
 {
   "cloudflare_dns_api.age".publicKeys = users ++ [ raddservernix ];
   "homepage-dashboard.age".publicKeys = users ++ [ raddservernix ];
+  "vaultwarden.age".publicKeys = users ++ [ raddservernix ];
 }
