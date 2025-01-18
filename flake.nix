@@ -10,9 +10,11 @@
 
     agenix.url = "github:ryantm/agenix";
     agenix.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-minecraft.url = "github:Infinidoge/nix-minecraft";
   };
   
-  outputs = {self, nixpkgs, home-manager, agenix, ... }:
+  outputs = {self, nixpkgs, home-manager, agenix, ... }@inputs:
     let
       lib = nixpkgs.lib;
       system = "x86_64-linux";
@@ -21,6 +23,7 @@
     nixosConfigurations = {
       raddservernix = lib.nixosSystem {
         inherit system;
+        specialArgs = {inherit inputs;};
         modules = [ 
           ./configuration.nix agenix.nixosModules.default
         ];
