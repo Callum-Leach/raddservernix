@@ -2,13 +2,14 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   imports =
     [ # Include the results of the hardware scan.
       ./hardware-configuration.nix
       ./secrets.nix
+      inputs.nix-minecraft.nixosModules.minecraft-servers
     ];
 
   # Bootloader.
@@ -82,6 +83,8 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
+  nixpkgs.overlays = [ inputs.nix-minecraft.overlay ];
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -118,6 +121,23 @@
 
   # List services that you want to enable:
 
+  services.minecraft-servers = {
+    enable = true;
+    eula = true;
+    openFirewall = true;
+
+    servers = {
+      callums-server = {
+        enable = true;
+        package = pkgs.fabricServers.fabric-1_21_4;
+        jvmOpts = "-Xms6144M -Xmx8192M";
+
+        serverProperties = {/* */};
+        whitelist = {/* */};
+      };   
+    };
+  };
+
   services.jellyfin = {
     enable = true;
     openFirewall = true;
@@ -127,11 +147,17 @@
 
   services.vaultwarden = {
     enable = true;
-#    dbBackend = "postgresql";
+    # dbBackend = "postgresql";
     # Store your variables like admin password here
     environmentFile = config.age.secrets.vaultwarden.path;
     config = {
-      SIGNUPS_ALLOWED = false;
+      websocketEnabled = true;
+
+      signupsAllowed = true;
+      signupsVerify = true;
+      signupsDomainsWhitelist = "vaultwarden.raddserver.co.uk";
+
+      SIGNUPS_ALLOWED = true;
       DOMAIN = "https://vaultwarden.raddserver.co.uk";
     };
   };
@@ -171,7 +197,15 @@
     '';
 
     virtualHosts."vaultwarden.raddserver.co.uk".extraConfig = ''
-      reverse_proxy http://192.168.1.22:8000
+      reverse_proxy http://127.0.0.1:8000
+
+      tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
+        protocols tls1.3
+      }
+    '';
+
+    virtualHosts."minecraft.raddserver.co.uk".extraConfig = ''
+      reverse_proxy http://127.0.0.1:25565
 
       tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
         protocols tls1.3
