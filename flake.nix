@@ -12,6 +12,7 @@
     agenix.inputs.nixpkgs.follows = "nixpkgs";
 
     nix-minecraft.url = "github:Infinidoge/nix-minecraft";
+
   };
   
   outputs = {self, nixpkgs, home-manager, agenix, ... }@inputs:

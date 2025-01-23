@@ -12,11 +12,12 @@
       inputs.nix-minecraft.nixosModules.minecraft-servers
     ];
 
+  nixpkgs.overlays = [ inputs.nix-minecraft.overlay ];
+
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  networking.hostName = "raddservernix"; # Define your hostname.
   # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
 
   # Configure network proxy if necessary
@@ -24,9 +25,31 @@
   # networking.proxy.noProxy = "127.0.0.1,localhost,internal.domain";
 
   # Enable networking
-  networking.networkmanager.enable = true;
-  networking.firewall.allowedTCPPorts = [ 80 443 25565 ];
+  #networking.networkmanager.enable = true;
+  #networking.firewall.allowedTCPPorts = [ 80 443 25565 ];
 
+  networking = {
+    networkmanager.enable = true;
+    firewall.enable = false;
+    hostName = "raddservernix";
+
+    firewall.allowedTCPPorts = [ 80 443 25565 ];
+
+    interfaces = {
+      enp3s0 = {
+        useDHCP = false;
+        ipv4.addresses = [ {
+          address = "192.168.1.22";
+          prefixLength = 24;
+        } ];
+      };
+    };
+    defaultGateway = "192.168.1.1";
+    nameservers = [ "8.8.8.8" ];
+  localCommands = ''
+    ip rule add to 192.168.1.1/24 priority 2500 lookup main
+  '';
+  };
 
   nixpkgs.config.packageOverrides = pkgs: {
     vaapiIntel = pkgs.vaapiIntel.override { enableHybridCodec = true; };
@@ -83,15 +106,13 @@
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
-  nixpkgs.overlays = [ inputs.nix-minecraft.overlay ];
-
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
   #  vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
   #  wget
     git
-    htop
+    btop
     pkgs.jellyfin
     pkgs.jellyfin-web
     pkgs.jellyfin-ffmpeg
@@ -124,18 +145,28 @@
   services.minecraft-servers = {
     enable = true;
     eula = true;
-    openFirewall = true;
 
     servers = {
-      callums-server = {
+      callums-server1 = {
         enable = true;
+        jvmOpts = "-Xms16G -Xmx16G";
         package = pkgs.fabricServers.fabric-1_21_4;
-        jvmOpts = "-Xms6144M -Xmx8192M";
-
+        
         serverProperties = {/* */};
         whitelist = {/* */};
-      };   
-    };
+
+        symlinks =
+        let
+          modpack = pkgs.fetchPackwizModpack {
+            url = "https://cdn.modrinth.com/data/iC1gWISY/versions/WmCsnqgz/raddserver-1.0.0.mrpack";
+            packHash = "fab07c52b5dd6a154789ba52b02f0f77aa9eacd519d47c9cb971e49f2a25b73a";
+          };
+        in
+        {
+          "mods" = "${modpack}/mods";
+        };
+      };
+    }; 
   };
 
   services.jellyfin = {
@@ -147,19 +178,29 @@
 
   services.vaultwarden = {
     enable = true;
-    # dbBackend = "postgresql";
+    dbBackend = "postgresql";
     # Store your variables like admin password here
     environmentFile = config.age.secrets.vaultwarden.path;
     config = {
       websocketEnabled = true;
-
+      ROCKET_PORT = 8222;
       signupsAllowed = true;
-      signupsVerify = true;
       signupsDomainsWhitelist = "vaultwarden.raddserver.co.uk";
 
-      SIGNUPS_ALLOWED = true;
-      DOMAIN = "https://vaultwarden.raddserver.co.uk";
+#      DOMAIN = "https://vaultwarden.raddserver.co.uk";
+      databaseUrl = "postgresql://vaultwarden@/vaultwarden";
     };
+  };
+
+  services.postgresql = {
+    enable = true;
+    ensureUsers = [
+      {
+        name = "vaultwarden";
+        ensureDBOwnership = true;
+      }
+    ];
+    ensureDatabases = [ "vaultwarden" ];
   };
 
   security.acme = {
@@ -197,15 +238,7 @@
     '';
 
     virtualHosts."vaultwarden.raddserver.co.uk".extraConfig = ''
-      reverse_proxy http://127.0.0.1:8000
-
-      tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
-        protocols tls1.3
-      }
-    '';
-
-    virtualHosts."minecraft.raddserver.co.uk".extraConfig = ''
-      reverse_proxy http://127.0.0.1:25565
+      reverse_proxy http://127.0.0.1:8222
 
       tls /var/lib/acme/raddserver.co.uk/cert.pem /var/lib/acme/raddserver.co.uk/key.pem {
         protocols tls1.3
