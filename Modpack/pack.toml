@@ -1,0 +1,13 @@
+name = "raddserver"
+author = "Callum Leach"
+version = "1.0.0"
+pack-format = "packwiz:1.1.0"
+
+[index]
+file = "index.toml"
+hash-format = "sha256"
+hash = "608fa22377178fd86c986a89db208febe4d5f8faab4dc6e17cdf0b7700cf1962"
+
+[versions]
+fabric = "0.16.10"
+minecraft = "1.21.4"
