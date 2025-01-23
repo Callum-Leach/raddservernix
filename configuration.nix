@@ -158,8 +158,8 @@
         symlinks =
         let
           modpack = pkgs.fetchPackwizModpack {
-            url = "https://cdn.modrinth.com/data/iC1gWISY/versions/WmCsnqgz/raddserver-1.0.0.mrpack";
-            packHash = "fab07c52b5dd6a154789ba52b02f0f77aa9eacd519d47c9cb971e49f2a25b73a";
+            url = "https://raw.githubusercontent.com/Callum-Leach/raddservernix/refs/heads/main/Modpack/pack.toml";
+            packHash = "sha256-5KyzvP8CYHTr0bhaiQX7Y0ASZZb/Z+wTRauhjSWJrHQ=";
           };
         in
         {
