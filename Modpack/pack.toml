@@ -1,12 +1,12 @@
 name = "raddserver"
 author = "Callum Leach"
-version = "1.0.0"
-pack-format = "packwiz:1.1.0"
+version = "1.0.1"
+pack-format = "packwiz:1.1.1"
 
 [index]
 file = "index.toml"
 hash-format = "sha256"
-hash = "608fa22377178fd86c986a89db208febe4d5f8faab4dc6e17cdf0b7700cf1962"
+hash = "42624c53eb88c69fb7346ad15b25a6351b43aebbb3aa80f7bbc6fe6ccd326a5a"
 
 [versions]
 fabric = "0.16.10"
