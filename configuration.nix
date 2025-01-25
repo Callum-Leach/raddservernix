@@ -66,6 +66,13 @@
     ];
   };
 
+  nixpkgs.config.permittedInsecurePackages = [
+    "aspnetcore-runtime-6.0.36"
+    "aspnetcore-runtime-wrapped-6.0.36"
+    "dotnet-sdk-6.0.428"
+    "dotnet-sdk-wrapped-6.0.428"
+  ];
+
   # Set your time zone.
   time.timeZone = "Europe/London";
 
@@ -143,7 +150,7 @@
   # List services that you want to enable:
 
   services.minecraft-servers = {
-    enable = true;
+    enable = false;
     eula = true;
 
     servers = {
@@ -175,6 +182,11 @@
     dataDir = "/mnt/main/";
     user = "callumleach";
   };
+
+#  services.sonarr = {
+#    enable = true;
+#    openFirewall = true;
+#  };
 
   services.vaultwarden = {
     enable = true;
